@@ -3,7 +3,7 @@
 
 /*
  * This script will automatically complete all optional assignments on CodeHS.
- * It currently gets videos, free responses, examples, surveys, and resources.
+ * It currently gets videos, free responses, examples, surveys, demos, and resources.
  */
 
 const modules = Array.from(
@@ -16,6 +16,7 @@ const completableSelectors = [
   "example",
   "survey",
   "resource",
+  "demo",
 ];
 
 // some items are duplicated in the modules, so we need to keep track of what we've already done
