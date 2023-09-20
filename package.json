@@ -1,9 +1,5 @@
 {
   "name": "scripts",
-  "scripts": {
-    "build": "bun run src/build.ts"
-  },
-  "type": "module",
   "devDependencies": {
     "@types/jquery": "^3.5.19",
     "bun-types": "latest"
@@ -11,7 +7,8 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "dependencies": {
-    "bookmarklet": "^3.0.0"
-  }
+  "scripts": {
+    "build": "bun run src/build.ts"
+  },
+  "type": "module"
 }
