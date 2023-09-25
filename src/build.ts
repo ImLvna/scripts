@@ -1,38 +1,32 @@
 import { mkdir, readdir, rm, stat } from "fs/promises";
-import iife from "./iife";
+import cssPlugin from "./cssPlugin";
 const dirs = await readdir("src");
 
-await rm("dist", { recursive: true });
+await rm("dist", { recursive: true, force: true });
 await mkdir("dist", { recursive: true });
 
-for (const dir of dirs) {
-  if (!(await stat(`src/${dir}`)).isDirectory()) continue;
-  const files = await readdir(`src/${dir}`);
+for (const group of dirs) {
+  if (!(await stat(`src/${group}`)).isDirectory()) continue;
+  const projects = await readdir(`src/${group}`);
 
-  const built = await Bun.build({
-    entrypoints: files.map((f) => `src/${dir}/${f}`),
-    outdir: `dist/${dir}`,
-    target: "browser",
-    minify: true,
+  for (const proj of projects) {
+    let entrypoint: string;
+    if (await Bun.file(`src/${group}/${proj}/index.ts`).exists())
+      entrypoint = `src/${group}/${proj}/index.ts`;
+    else if (await Bun.file(`src/${group}/${proj}/index.tsx`).exists())
+      entrypoint = `src/${group}/${proj}/index.tsx`;
+    else continue;
+    const success = await Bun.build({
+      entrypoints: [entrypoint],
+      minify: true,
+      outdir: `dist/${group}/${proj}`,
+      target: "browser",
+      plugins: [cssPlugin],
+    });
 
-    plugins: [iife],
-  });
-
-  if (!built.success) {
-    console.error(built.logs);
-    console.error("Build failed");
-    process.exit(1);
-  }
-
-  for (const _file of files) {
-    const fileContents = await Bun.file(
-      `./dist/${dir}/${_file.replace(".ts", "")}.js`
-    ).text();
-
-    const outFile = Bun.file(
-      `./dist/${dir}/${_file.replace(".ts", "")}.bookmarklet.js`
-    );
-
-    await Bun.write(outFile, `javascript:${encodeURIComponent(fileContents)}`);
+    if (!success.success) {
+      console.error("Error building", group, proj);
+      console.error(success.logs);
+    }
   }
 }
